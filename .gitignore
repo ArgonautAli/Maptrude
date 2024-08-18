@@ -16,3 +16,6 @@ logs/
 # OS-specific files
 .DS_Store
 Thumbs.db
+
+/frontend/node_modules
+/backend/node_modules
