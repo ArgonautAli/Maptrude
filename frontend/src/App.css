@@ -6,6 +6,7 @@
 
 .App {
   text-align: center;
+  height: calc(100vh - 46px);
 }
 
 .App-logo {

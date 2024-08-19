@@ -44,7 +44,7 @@ export const Login = () => {
         fullName: data.fullName,
       })
     );
-    navigate("/map");
+    navigate(APP_ROUTES.MAP);
     console.log("done");
   };
 

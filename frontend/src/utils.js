@@ -1,7 +1,7 @@
 export const APP_ROUTES = {
   LOGIN: "/login",
   SIGNUP: "/signup",
-  MAP: "/MAP",
+  MAP: "/map",
 };
 
 export const API_ROUTES = {
