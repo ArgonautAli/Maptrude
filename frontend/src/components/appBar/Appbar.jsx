@@ -21,6 +21,7 @@ export const Appbar = () => {
               onClick={() => {
                 logout();
                 navigate(APP_ROUTES.LOGIN);
+                localStorage.removeItem("persist:root");
               }}
             >
               Logout

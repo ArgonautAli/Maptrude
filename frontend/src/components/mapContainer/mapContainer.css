@@ -22,3 +22,19 @@
   display: flex;
   gap: 10px;
 }
+
+.fullscreen-container {
+  /* position: fixed;
+  top: 0;
+  left: 0; */
+  width: 100vw;
+  height: calc(100vh-46px);
+  background-color: black;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.hidden {
+  display: none;
+}

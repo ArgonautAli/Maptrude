@@ -9,10 +9,22 @@ var usersRouter = require("./routes/users");
 const { auth } = require("./routes/auth/auth.routes");
 const { texture } = require("./routes/texture/texture.routes");
 const { dbConnect } = require("./db");
+const redisClient = require("./redisClient");
+
 const bodyParser = require("body-parser");
+
+redisClient.on("connect", () => {
+  console.log("Connected to Redis");
+});
+
+redisClient.on("error", (err) => {
+  console.error("Redis error:", err);
+});
+
 dbConnect;
 
 var app = express();
+
 app.use(
   cors({
     origin: "*", // Allow all origins
@@ -20,6 +32,7 @@ app.use(
     allowedHeaders: "Content-Type,Authorization",
   })
 );
+
 app.use(express.json()); // Parses JSON requests
 app.use(express.urlencoded({ extended: true })); // Parses URL-encoded requests
 

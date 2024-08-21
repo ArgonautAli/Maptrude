@@ -1,33 +1,39 @@
+// mapSlice.js
 import { createSlice } from "@reduxjs/toolkit";
 
-const initialState = {
-  isOpen: false,
-  drawShape: false,
-  bbox: {
-    south: 0,
-    west: 0,
-    north: 0,
-    east: 0,
+const mapSlice = createSlice({
+  name: "map",
+  initialState: {
+    rectangleBounds: null,
+    drawShape: false,
+    texture: null,
+    cancelRect: false,
   },
-};
-
-const mapDataSlice = createSlice({
-  name: "MAP_DATA_SLICE",
-  initialState,
   reducers: {
-    resetMapState: () => initialState,
-    openMap: (state, { payload: { isOpen } }) => {
-      state.isOpen = isOpen;
+    setRectangleBounds: (state, action) => {
+      state.rectangleBounds = action.payload;
+      state.cancelRect = false;
     },
-    drawShape: (state, { payload: { drawShape } }) => {
-      state.drawShape = drawShape;
+    toggleDrawShape: (state, action) => {
+      state.drawShape = action.payload;
+      state.cancelRect = false;
     },
-    setMapData: (state, { payload: { bbox } }) => {
-      state.bbox = bbox;
+    setMapData: (state, action) => {
+      state.texture = action.payload.texture;
+      state.cancelRect = false;
+    },
+    clearRectangle: (state) => {
+      state.rectangleBounds = null;
+      state.drawShape = false;
+      state.cancelRect = true;
     },
   },
 });
 
-export const { resetMapState, setMapData, openMap, drawShape } =
-  mapDataSlice.actions;
-export default mapDataSlice.reducer;
+export const {
+  setRectangleBounds,
+  toggleDrawShape,
+  setMapData,
+  clearRectangle,
+} = mapSlice.actions;
+export default mapSlice.reducer;

@@ -4,8 +4,8 @@ import axios from "axios";
 export const loginUser = async (
   username,
   password,
-  successCallback,
-  errorCallback
+  successCallback = () => {},
+  errorCallback = () => {}
 ) => {
   const body = {
     userName: username,
@@ -23,13 +23,11 @@ export const loginUser = async (
     if (!username || !password) {
       throw new Error("Please provide a valid username or password.");
     } else {
-      console.log("response");
       await axios(config)
         .then(function (response) {
-          console.log("response", response);
           setJwtToken(response.data.access_token);
           setRefreshToken(response.data.refresh_token);
-          successCallback?.(response.data);
+          successCallback?.(response.data.data);
         })
         .catch(function (error) {
           errorCallback?.(error.message);

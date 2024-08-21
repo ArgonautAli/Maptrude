@@ -6,10 +6,12 @@ import {
   DrawingManagerF,
 } from "@react-google-maps/api";
 import "./mapContainer.css";
-import { Toolbar } from "../toolbar/Toolbar";
+import { Toolbar } from "../toolbar/Toolbar.jsx";
 import { useDispatch, useSelector } from "react-redux";
-import { openMap } from "./Map.slice.js";
+import { setMapData, setRectangleBounds, clearRectangle } from "./Map.slice.js";
+import { SpinningBox } from "../cube/Cube.js";
 import html2canvas from "html2canvas";
+import { saveTexture } from "./helper.js";
 
 const libraries = ["places", "drawing"];
 const mapContainerStyle = {
@@ -23,77 +25,154 @@ const center = {
 
 export const MapContainer = () => {
   const dispatch = useDispatch();
-  const mapContainerRef = useRef(null);
-  const [mapInstance, setMapInstance] = useState(null);
-  const [overlayPosition, setOverlayPosition] = useState(null);
-  const isOpen = useSelector((state) => state.mapData.isOpen);
-  const drawShape = useSelector((state) => state.mapData.drawShape);
-
   const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAP,
     libraries,
   });
-
-  const [rectangle, setRectangle] = useState(null);
+  const mapContainerRef = useRef(null);
+  const [mapInstance, setMapInstance] = useState(null);
+  const rectangle = useRef(null); // Track the rectangle instance
+  const texture = useSelector((state) => state.mapData.texture);
+  const drawShape = useSelector((state) => state.mapData.drawShape);
+  const rectangleBounds = useSelector((state) => state.mapData.rectangleBounds);
+  const cancelRect = useSelector((state) => state.mapData.cancelRect);
+  const userId = useSelector((state) => state.userData.userId);
 
   useEffect(() => {
-    if (!isOpen && rectangle) {
-      rectangle.setMap(null); // This removes the rectangle from the map
-      setRectangle(null);
-    }
-  }, [isOpen]);
-
-  useEffect(() => {
-    if (drawShape && rectangle) {
-      const bounds = rectangle.getBounds();
-      const northEast = bounds.getNorthEast();
-      const southWest = bounds.getSouthWest();
-      captureMap(northEast, southWest);
-      // rectangle.setMap(null);
-      // setRectangle(null);
+    if (drawShape) {
+      captureMap();
     }
   }, [drawShape]);
+
+  useEffect(() => {
+    if (cancelRect) {
+      handleCancel();
+    }
+  }, [cancelRect]);
+
+  useEffect(() => {
+    return () => {
+      if (rectangle.current) {
+        rectangle.current.setMap(null);
+      }
+    };
+  }, []);
 
   const onLoad = (map) => {
     setMapInstance(map);
   };
 
-  const onRectangleComplete = (rectangle) => {
-    dispatch(openMap({ isOpen: true }));
-    setRectangle(rectangle);
+  const onRectangleComplete = (rect) => {
+    rectangle.current = rect; // Store the rectangle instance
+    const bounds = rect.getBounds();
+    dispatch(
+      setRectangleBounds({
+        northEast: bounds.getNorthEast().toJSON(),
+        southWest: bounds.getSouthWest().toJSON(),
+      })
+    );
   };
 
-  const captureMap = (northEast, southWest) => {
-    if (mapContainerRef.current) {
-      html2canvas(mapContainerRef.current, {
-        useCORS: true,
-      }).then((canvas) => {
+  const handleCancel = () => {
+    if (rectangle.current) {
+      rectangle.current.setMap(null); // Remove rectangle from the map
+      rectangle.current = null; // Clear the rectangle instance
+      dispatch(setRectangleBounds(null)); // Clear Redux state
+      dispatch(clearRectangle()); // Clear additional state if needed
+    }
+  };
+
+  const captureMap = () => {
+    if (mapContainerRef.current && rectangleBounds) {
+      html2canvas(mapContainerRef.current, { useCORS: true }).then((canvas) => {
         const croppedCanvas = document.createElement("canvas");
         const context = croppedCanvas.getContext("2d");
 
-        const width = 100;
-        const height = 100;
+        // Get the full map container dimensions
+        const { width: mapWidth, height: mapHeight } =
+          mapContainerRef.current.getBoundingClientRect();
 
-        croppedCanvas.width = width;
-        croppedCanvas.height = height;
+        // Get the current map bounds (full visible area of the map)
+        const mapBounds = mapInstance.getBounds();
+        const mapNorthEast = mapBounds.getNorthEast();
+        const mapSouthWest = mapBounds.getSouthWest();
 
+        // Ensure the bounds are valid
+        if (!mapNorthEast || !mapSouthWest) {
+          console.error("Invalid map bounds");
+          return;
+        }
+
+        // Convert geographical coordinates to pixel coordinates
+        const lngToX = (lng) =>
+          ((lng - mapSouthWest.lng()) /
+            (mapNorthEast.lng() - mapSouthWest.lng())) *
+          mapWidth;
+        const latToY = (lat) =>
+          mapHeight -
+          ((lat - mapSouthWest.lat()) /
+            (mapNorthEast.lat() - mapSouthWest.lat())) *
+            mapHeight;
+
+        const northEastPx = {
+          x: lngToX(rectangleBounds.northEast.lng),
+          y: latToY(rectangleBounds.northEast.lat),
+        };
+        const southWestPx = {
+          x: lngToX(rectangleBounds.southWest.lng),
+          y: latToY(rectangleBounds.southWest.lat),
+        };
+
+        const startX = Math.min(northEastPx.x, southWestPx.x);
+        const startY = Math.min(northEastPx.y, southWestPx.y);
+
+        const endX = Math.max(northEastPx.x, southWestPx.x);
+        const endY = Math.max(northEastPx.y, southWestPx.y);
+
+        const rectangleWidth = endX - startX;
+        const rectangleHeight = endY - startY;
+
+        // Set cropped canvas dimensions
+        croppedCanvas.width = rectangleWidth;
+        croppedCanvas.height = rectangleHeight;
+
+        // Draw the cropped area on the new canvas
         context.drawImage(
           canvas,
-          northEast.x,
-          northEast.y,
-          width,
-          height,
+          northEastPx.x,
+          northEastPx.y,
+          rectangleWidth,
+          rectangleHeight,
           0,
           0,
-          width,
-          height
+          rectangleWidth,
+          rectangleHeight
         );
 
-        console.log("croppedCanvas", croppedCanvas);
         const imageUrl = croppedCanvas.toDataURL("image/png");
-        console.log("Captured image:", imageUrl);
+
+        if (imageUrl) {
+          dispatch(setMapData({ texture: imageUrl }));
+          saveTextureHandler(imageUrl);
+        } else {
+          console.error("Failed to generate image URL");
+        }
       });
     }
+  };
+
+  const saveTextureHandler = async (imageUrl) => {
+    await saveTexture(
+      imageUrl,
+      rectangleBounds,
+      userId,
+      (data) => {
+        console.log("data", data);
+      },
+      (data) => {
+        console.log("data", data);
+      }
+    );
   };
 
   if (loadError) {
@@ -105,39 +184,47 @@ export const MapContainer = () => {
   }
 
   return (
-    <div ref={mapContainerRef}>
-      <GoogleMap
-        onLoad={onLoad}
-        mapContainerStyle={mapContainerStyle}
-        zoom={10}
-        center={center}
-        options={{
-          mapTypeControlOptions: {
-            position: window.google.maps.ControlPosition.LEFT_TOP,
-          },
-        }}
-      >
-        <DrawingManagerF
-          onRectangleComplete={onRectangleComplete}
-          options={{
-            drawingMode: window.google.maps.drawing.OverlayType.RECTANGLE,
-            drawingControl: true,
-            drawingControlOptions: {
-              position: window.google.maps.ControlPosition.LEFT_CENTER,
-              drawingModes: ["rectangle"],
-            },
-            rectangleOptions: {
-              fillColor: "#2196F3",
-              fillOpacity: 0.5,
-              strokeWeight: 2,
-              clickable: false,
-              editable: true,
-              zIndex: 1,
-            },
-          }}
-        />
-        <Marker position={center} />
-      </GoogleMap>
+    <div>
+      {texture !== null ? (
+        <div className="fullscreen-container">
+          <SpinningBox />
+        </div>
+      ) : (
+        <div ref={mapContainerRef} className={texture === null ? "" : "hidden"}>
+          <GoogleMap
+            onLoad={onLoad}
+            mapContainerStyle={mapContainerStyle}
+            zoom={10}
+            center={center}
+            options={{
+              mapTypeControlOptions: {
+                position: window.google.maps.ControlPosition.LEFT_TOP,
+              },
+            }}
+          >
+            <DrawingManagerF
+              onRectangleComplete={onRectangleComplete}
+              options={{
+                drawingMode: window.google.maps.drawing.OverlayType.RECTANGLE,
+                drawingControl: true,
+                drawingControlOptions: {
+                  position: window.google.maps.ControlPosition.LEFT_CENTER,
+                  drawingModes: ["rectangle"],
+                },
+                rectangleOptions: {
+                  fillColor: "#2196F3",
+                  fillOpacity: 0.5,
+                  strokeWeight: 2,
+                  clickable: false,
+                  editable: true,
+                  zIndex: 1,
+                },
+              }}
+            />
+            <Marker position={center} />
+          </GoogleMap>
+        </div>
+      )}
       <div className="toolbar">
         <Toolbar />
       </div>

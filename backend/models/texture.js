@@ -2,9 +2,10 @@ const mongoose = require("mongoose");
 
 const TextureSchema = new mongoose.Schema(
   {
-    img: { type: String, required: true },
+    texture: { type: String, required: true },
+    coords: { type: Object, required: true },
     createdBy: { type: String, required: true },
-    info: { type: String, required: true },
+    geoCode: { type: String, required: false },
   },
   {
     collection: "textures",

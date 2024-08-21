@@ -30,7 +30,7 @@ export const Login = () => {
     await loginUser(
       formData.username,
       formData.password,
-      successHandler,
+      (data) => successHandler(data),
       () => {}
     );
   };
@@ -44,8 +44,7 @@ export const Login = () => {
         fullName: data.fullName,
       })
     );
-    navigate(APP_ROUTES.MAP);
-    console.log("done");
+    navigate(APP_ROUTES.MAP, { replace: true });
   };
 
   return (

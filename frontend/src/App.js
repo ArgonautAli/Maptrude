@@ -5,6 +5,9 @@ import { Map } from "./pages/map/Map";
 import { Route, Routes } from "react-router-dom";
 import { APP_ROUTES } from "./utils";
 import { ProtectedRoute } from "./components/protectedRoute/ProtectedRoute";
+import { addAuthInterceptor } from "./interceptor";
+
+addAuthInterceptor();
 
 function App() {
   return (
