@@ -13,6 +13,12 @@ const redisClient = require("./redisClient");
 
 const bodyParser = require("body-parser");
 
+async function redisCon() {
+  await redisClient.connect();
+}
+
+redisCon();
+
 redisClient.on("connect", () => {
   console.log("Connected to Redis");
 });

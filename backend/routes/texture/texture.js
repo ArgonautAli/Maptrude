@@ -16,18 +16,6 @@ const createTexture = router.post("/", async function (req, res) {
         .json({ status: "error", message: "Missing fields" });
     }
 
-    const cachekey = `textures_${createdBy}`;
-
-    const cachedData = await redisClient.get(cacheKey);
-    console.log("cachedData", cachedData);
-    if (cachedData) {
-      // return res.json(JSON.parse(cachedData));
-      console.log("cached", JSON.parse(cachedData));
-    }
-
-    const textures = await Texture.find({ createdBy: userId });
-    await redisClient.setex(cachekey, 3600, JSON.stringify(textures));
-
     const { northEast, southWest } = coords;
 
     const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${northEast.lat},${northEast.lng}&key=${process.env.GOOGLE_MAPS_API_KEY}`;
@@ -76,7 +64,17 @@ const getTexture = router.get("/:userId", async function (req, res) {
     if (!user) {
       return res.json({ status: "error", message: "User does not exist" });
     }
+    const cachekey = `textures_${userId}`;
+
+    const cachedData = await redisClient.get(cachekey);
+    console.log("cachedData", cachedData);
+    if (cachedData) {
+      // return res.json(JSON.parse(cachedData));
+      console.log("cached", JSON.parse(cachedData));
+    }
+
     const textures = await Texture.find({ createdBy: userId });
+    await redisClient.setex(cachekey, 3600, JSON.stringify(textures));
 
     if (!textures.length) {
       return res.json({ status: "error", message: "User does not exist" });
