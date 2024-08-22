@@ -6,12 +6,11 @@ import { Appbar } from "../appBar/Appbar";
 import { Login } from "../../pages/login/Login";
 
 export const ProtectedRoute = () => {
+  const location = useLocation();
   const isAuthorized = localStorage.getItem("token");
   if (!isAuthorized)
     return (
-      <>
-        <Login />
-      </>
+      <Navigate to={APP_ROUTES.LOGIN} state={{ from: location }} replace />
     );
 
   return (
