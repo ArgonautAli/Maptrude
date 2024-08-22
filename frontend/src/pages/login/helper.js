@@ -25,7 +25,7 @@ export const loginUser = async (
     } else {
       await axios(config)
         .then(function (response) {
-          setJwtToken(response.data.token);
+          setJwtToken(response.data.data.token);
           successCallback?.(response.data.data);
         })
         .catch(function (error) {
