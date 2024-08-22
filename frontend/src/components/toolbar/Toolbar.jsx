@@ -113,7 +113,7 @@ export const Toolbar = () => {
             })}
           </>
         ) : (
-          <p>No recent textures found</p>
+          <Menu.Item>No recent textures found</Menu.Item>
         )}
       </SubMenu>
       <SubMenu
@@ -135,7 +135,7 @@ export const Toolbar = () => {
             })}
           </>
         ) : (
-          <p>No Frequent regions</p>
+          <Menu.Item>No frequent regions found</Menu.Item>
         )}
       </SubMenu>
       {rectangleBounds && !texture ? (

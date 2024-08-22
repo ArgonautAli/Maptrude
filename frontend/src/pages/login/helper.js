@@ -25,8 +25,7 @@ export const loginUser = async (
     } else {
       await axios(config)
         .then(function (response) {
-          setJwtToken(response.data.access_token);
-          setRefreshToken(response.data.refresh_token);
+          setJwtToken(response.data.token);
           successCallback?.(response.data.data);
         })
         .catch(function (error) {
@@ -48,12 +47,4 @@ export function getJwtToken() {
 
 export function setJwtToken(token) {
   localStorage.setItem("token", token);
-}
-
-export function getRefreshToken() {
-  return localStorage.getItem("refreshToken");
-}
-
-export function setRefreshToken(token) {
-  localStorage.setItem("refreshToken", token);
 }
