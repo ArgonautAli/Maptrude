@@ -16,6 +16,15 @@ const createTexture = router.post("/", async function (req, res) {
         .json({ status: "error", message: "Missing fields" });
     }
 
+    const cacheKey = `textures_${createdBy}`;
+    const top_geocodes = "top_3_geocodes";
+    console.log("cacheKey", cacheKey);
+    const result1 = await redisClient.del(cacheKey);
+    const result2 = await redisClient.del(top_geocodes);
+
+    console.log(`Deleted ${result1} key(s) for ${cacheKey}`);
+    console.log(`Deleted ${result2} key(s) for ${top_geocodes}`);
+
     const { northEast, southWest } = coords;
 
     const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${northEast.lat},${northEast.lng}&key=${process.env.GOOGLE_MAPS_API_KEY}`;
@@ -41,10 +50,6 @@ const createTexture = router.post("/", async function (req, res) {
       createdBy,
       geoCode,
     });
-    const cacheKey = `textures_${createdBy}`;
-    const top_geocodes = "top_3_geocodes";
-    await redisClient.del(cacheKey);
-    await redisClient.del(top_geocodes);
 
     res.json({ status: "ok", message: "Texture created successfully!" });
   } catch (err) {
@@ -66,8 +71,9 @@ const getTexture = router.get("/:userId", async function (req, res) {
       return res.json({ status: "error", message: "User does not exist" });
     }
     const cachekey = `textures_${userId}`;
-
     const cachedData = await redisClient.get(cachekey);
+    console.log(cachekey, "cachekey");
+
     if (cachedData) {
       return res.json({ status: "ok", data: JSON.parse(cachedData) });
     }
@@ -110,7 +116,7 @@ const getMostCreated = router.get("/", async function (req, res) {
       },
       { $sort: { count: -1 } },
       { $limit: 3 },
-    ]);
+    ]).allowDiskUse(true);
 
     await redisClient.set(cacheKey, JSON.stringify(topGeoCodes));
 

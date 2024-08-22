@@ -5,12 +5,15 @@ const TextureSchema = new mongoose.Schema(
     texture: { type: String, required: true },
     coords: { type: Object, required: true },
     createdBy: { type: String, required: true },
-    geoCode: { type: String, required: false },
+    geoCode: { type: String, required: false, index: true },
   },
   {
     collection: "textures",
   }
 );
+
+// Compound index on geoCode and coords
+TextureSchema.index({ geoCode: 1, coords: 1 });
 
 const Texture = mongoose.model("TextureSchema", TextureSchema);
 

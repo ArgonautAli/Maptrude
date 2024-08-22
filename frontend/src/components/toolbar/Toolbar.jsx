@@ -86,7 +86,7 @@ export const Toolbar = () => {
       theme={"light"}
       onClick={onClick}
       style={{
-        width: 256,
+        width: 300,
         borderRadius: "16px",
         padding: "8px",
         display: "flex",
@@ -96,7 +96,12 @@ export const Toolbar = () => {
       selectedKeys={[current]}
       mode="inline"
     >
-      <SubMenu key="sub1" icon={<FolderViewOutlined />} title="Recent textures">
+      <SubMenu
+        style={{ maxHeight: "250px", overflow: "scroll" }}
+        key="sub1"
+        icon={<FolderViewOutlined />}
+        title="Recent textures"
+      >
         {textureList.map((texture, index) => {
           return (
             <Menu.Item key={`texture_${index}`}>
@@ -107,6 +112,7 @@ export const Toolbar = () => {
       </SubMenu>
       <SubMenu
         key="sub2"
+        style={{ maxHeight: "250px", overflow: "scroll" }}
         icon={<FieldNumberOutlined />}
         title="Frequent regions"
       >
