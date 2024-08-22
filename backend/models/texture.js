@@ -6,10 +6,10 @@ const TextureSchema = new mongoose.Schema(
     coords: { type: Object, required: true },
     createdBy: { type: String, required: true },
     geoCode: { type: String, required: false, index: true },
-    createdAt: { type: Date, default: Date.now },
   },
   {
     collection: "textures",
+    timestamps: true,
   }
 );
 
