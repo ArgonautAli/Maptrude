@@ -102,13 +102,19 @@ export const Toolbar = () => {
         icon={<FolderViewOutlined />}
         title="Recent textures"
       >
-        {textureList.map((texture, index) => {
-          return (
-            <Menu.Item key={`texture_${index}`}>
-              {texture.geoCode || `Region: ${index}`}
-            </Menu.Item>
-          );
-        })}
+        {textureList?.length > 0 ? (
+          <>
+            {textureList?.map((texture, index) => {
+              return (
+                <Menu.Item key={`texture_${index}`}>
+                  {texture.geoCode || `Region: ${index}`}
+                </Menu.Item>
+              );
+            })}
+          </>
+        ) : (
+          <p>No recent textures found</p>
+        )}
       </SubMenu>
       <SubMenu
         key="sub2"
@@ -116,15 +122,21 @@ export const Toolbar = () => {
         icon={<FieldNumberOutlined />}
         title="Frequent regions"
       >
-        {mostFreq.map((freq, index) => {
-          return (
-            <Menu.Item>
-              {`Region: ${freq._id || index}`}
-              <span> Count: {freq.count}</span>
-              {/* {`Count : ${freq.count}`} */}
-            </Menu.Item>
-          );
-        })}
+        {mostFreq?.length > 0 ? (
+          <>
+            {mostFreq.map((freq, index) => {
+              return (
+                <Menu.Item>
+                  {`Region: ${freq._id || index}`}
+                  <span> Count: {freq.count}</span>
+                  {/* {`Count : ${freq.count}`} */}
+                </Menu.Item>
+              );
+            })}
+          </>
+        ) : (
+          <p>No Frequent regions</p>
+        )}
       </SubMenu>
       {rectangleBounds && !texture ? (
         <>
