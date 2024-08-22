@@ -185,7 +185,7 @@ export const MapContainer = () => {
 
   return (
     <div>
-      {texture !== null ? (
+      {texture !== null && texture ? (
         <div className="fullscreen-container">
           <SpinningBox />
         </div>

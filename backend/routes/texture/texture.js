@@ -19,17 +19,13 @@ const createTexture = router.post("/", async function (req, res) {
     const { northEast, southWest } = coords;
 
     const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${northEast.lat},${northEast.lng}&key=${process.env.GOOGLE_MAPS_API_KEY}`;
-
-    // Fetch geocoding data for the north-east corner
     const northEastResponse = await axios.get(geocodeUrl);
     const northEastGeocode = northEastResponse.data;
 
-    // Fetch geocoding data for the south-west corner
     const southWestUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${southWest.lat},${southWest.lng}&key=${process.env.GOOGLE_MAPS_API_KEY}`;
     const southWestResponse = await axios.get(southWestUrl);
     const southWestGeocode = southWestResponse.data;
 
-    // Combine and process geocoding data
     const result = {
       northEast: northEastGeocode,
       southWest: southWestGeocode,
@@ -37,7 +33,7 @@ const createTexture = router.post("/", async function (req, res) {
 
     const geoCode = northEastGeocode.plus_code.compound_code
       .split(",")[1]
-      .slice(1);
+      .trim();
 
     const response = await Texture.create({
       texture,
@@ -45,6 +41,11 @@ const createTexture = router.post("/", async function (req, res) {
       createdBy,
       geoCode,
     });
+    const cacheKey = `textures_${createdBy}`;
+    const top_geocodes = "top_3_geocodes";
+    await redisClient.del(cacheKey);
+    await redisClient.del(top_geocodes);
+
     res.json({ status: "ok", message: "Texture created successfully!" });
   } catch (err) {
     const error = JSON.stringify(err);
@@ -67,15 +68,12 @@ const getTexture = router.get("/:userId", async function (req, res) {
     const cachekey = `textures_${userId}`;
 
     const cachedData = await redisClient.get(cachekey);
-    console.log("cachedData", cachedData);
     if (cachedData) {
-      // return res.json(JSON.parse(cachedData));
-      console.log("cached", JSON.parse(cachedData));
+      return res.json({ status: "ok", data: JSON.parse(cachedData) });
     }
 
     const textures = await Texture.find({ createdBy: userId });
-    await redisClient.setex(cachekey, 3600, JSON.stringify(textures));
-
+    await redisClient.set(cachekey, JSON.stringify(textures));
     if (!textures.length) {
       return res.json({ status: "error", message: "User does not exist" });
     }
@@ -88,4 +86,39 @@ const getTexture = router.get("/:userId", async function (req, res) {
   }
 });
 
-module.exports = { createTexture, getTexture };
+const getMostCreated = router.get("/", async function (req, res) {
+  try {
+    const cacheKey = "top_3_geocodes";
+
+    const cachedData = await redisClient.get(cacheKey);
+    if (cachedData) {
+      return res.json({ status: "ok", data: JSON.parse(cachedData) });
+    }
+
+    const topGeoCodes = await Texture.aggregate([
+      {
+        $group: {
+          _id: {
+            $cond: {
+              if: { $ne: ["$geoCode", null] },
+              then: "$geoCode",
+              else: "$coords",
+            },
+          },
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { count: -1 } },
+      { $limit: 3 },
+    ]);
+
+    await redisClient.set(cacheKey, JSON.stringify(topGeoCodes));
+
+    return res.json({ status: "ok", data: topGeoCodes });
+  } catch (error) {
+    console.error("Error fetching top 3 geocodes:", error);
+    res.status(500).json({ status: "error", message: error });
+  }
+});
+
+module.exports = { createTexture, getTexture, getMostCreated };

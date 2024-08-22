@@ -14,6 +14,19 @@
   pointer-events: none;
 }
 
+.entry-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: calc(100vh - 46px);
+  position: relative;
+  background: linear-gradient(
+    135deg,
+    /* Angle of the gradient */ #fbc2eb,
+    /* Start color */ #a6c0fe /* End color */
+  );
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .App-logo {
     animation: App-logo-spin infinite 20s linear;

@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Engine,
   Scene,
@@ -9,21 +9,19 @@ import {
 import { Vector3, Color3 } from "@babylonjs/core";
 import { useSelector } from "react-redux";
 
-const DefaultScale = new Vector3(1.5, 1.5, 1.5);
-const DefaultCuboidScale = new Vector3(1, 2, 3);
-const BiggerScale = new Vector3(1.25, 1.25, 1.25);
+const rpm = 5;
 
 export const SpinningBox = () => {
   const boxRef = useRef(null);
   const texture = useSelector((state) => state.mapData.texture);
   const [hovered, setHovered] = useState(false);
+
   useHover(
     () => setHovered(true),
     () => setHovered(false),
     boxRef
   );
 
-  const rpm = 5;
   useBeforeRender((scene) => {
     if (boxRef.current) {
       var deltaTimeInMillis = scene.getEngine().getDeltaTime();
@@ -31,6 +29,8 @@ export const SpinningBox = () => {
         (rpm / 60) * Math.PI * 2 * (deltaTimeInMillis / 1000);
     }
   });
+
+  console.log("texture123", texture);
 
   return (
     <Engine antialias adaptToDeviceRatio canvasId="babylonJS">
@@ -51,7 +51,7 @@ export const SpinningBox = () => {
         />
         <box name="cube" size={2} position={Vector3.Zero()}>
           <standardMaterial name="box-mat">
-            <texture url={texture} />
+            <texture key={texture} url={texture} />
           </standardMaterial>
         </box>
       </Scene>

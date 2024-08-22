@@ -6,6 +6,8 @@ import { useDispatch } from "react-redux";
 import { setUserData } from "./Login.slice";
 import { useNavigate } from "react-router-dom";
 import { APP_ROUTES } from "../../utils";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const initialFormData = {
   username: "",
@@ -37,6 +39,7 @@ export const Login = () => {
 
   const successHandler = (data) => {
     console.log(data);
+    toast("Login successful!");
     dispatch(
       setUserData({
         userName: data.userName,
@@ -49,18 +52,11 @@ export const Login = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <ToastContainer />
       <Appbar />
-      <div
-        className="flex-grow flex items-center justify-center"
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          alignContent: "center",
-        }}
-      >
+      <div className="entry-page flex-grow flex items-center justify-center">
         <FormBox
-          label={"Login"}
+          label={"Log In"}
           secondaryText={"Not a user? Signup"}
           secondaryRoute={APP_ROUTES.SIGNUP}
           formData={formData}

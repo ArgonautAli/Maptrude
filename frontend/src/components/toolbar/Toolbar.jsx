@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Menu } from "antd";
 import {
   CheckCircleOutlined,
   CloseOutlined,
   RollbackOutlined,
   FolderViewOutlined,
+  FieldNumberOutlined,
 } from "@ant-design/icons";
 import { useSelector, useDispatch } from "react-redux";
 import {
@@ -13,31 +14,70 @@ import {
   setRectangleBounds,
   clearRectangle,
 } from "../mapContainer/Map.slice";
+import { getMostFreqText, getTexture } from "../mapContainer/helper";
 
 export const Toolbar = () => {
   const { SubMenu } = Menu;
   const dispatch = useDispatch();
   const texture = useSelector((state) => state.mapData.texture);
   const rectangleBounds = useSelector((state) => state.mapData.rectangleBounds);
+  const userId = useSelector((state) => state.userData.userId);
   const [current, setCurrent] = useState("1");
+  const [textureList, setTextureList] = useState([]);
+  const [mostFreq, setMostFreq] = useState([]);
+
+  useEffect(() => {
+    getTextureHandler();
+    getMostFrequentTexture();
+  }, []);
+
+  const getTextureHandler = async () => {
+    await getTexture(
+      userId,
+      (data) => {
+        setTextureList(data);
+      },
+      (err) => {
+        console.err(err);
+      }
+    );
+  };
+
+  const getMostFrequentTexture = async () => {
+    await getMostFreqText(
+      (data) => setMostFreq(data),
+      (err) => {
+        console.err(err);
+      }
+    );
+  };
 
   const onClick = (e) => {
     setCurrent(e.key);
-    switch (e.key) {
-      case "1":
-        dispatch(toggleDrawShape(true));
-        break;
-      case "2":
-        dispatch(toggleDrawShape(false));
-        dispatch(setRectangleBounds(null)); // Clear the rectangle
-        dispatch(clearRectangle()); // Dispatch action to clear the rectangle
-        break;
-      case "3":
-        dispatch(setMapData({ texture: null }));
-        dispatch(toggleDrawShape(false));
-        dispatch(setRectangleBounds(null)); // Clear the rectangle
-        dispatch(clearRectangle());
-        break;
+
+    if (e.key.startsWith("texture_")) {
+      const textureId = e.key.replace("texture_", ""); // Extract the texture ID
+      dispatch(setMapData({ texture: textureList[textureId].texture }));
+      return;
+    } else {
+      switch (e.key) {
+        case "1":
+          dispatch(toggleDrawShape(true));
+          break;
+        case "2":
+          dispatch(toggleDrawShape(false));
+          dispatch(setRectangleBounds(null)); // Clear the rectangle
+          dispatch(clearRectangle()); // Dispatch action to clear the rectangle
+          break;
+        case "3":
+          dispatch(setMapData({ texture: null }));
+          dispatch(toggleDrawShape(false));
+          dispatch(setRectangleBounds(null));
+          dispatch(clearRectangle());
+          break;
+        default:
+          break;
+      }
     }
   };
 
@@ -56,15 +96,29 @@ export const Toolbar = () => {
       selectedKeys={[current]}
       mode="inline"
     >
+      <SubMenu key="sub1" icon={<FolderViewOutlined />} title="Recent textures">
+        {textureList.map((texture, index) => {
+          return (
+            <Menu.Item key={`texture_${index}`}>
+              {texture.geoCode || `Region: ${index}`}
+            </Menu.Item>
+          );
+        })}
+      </SubMenu>
       <SubMenu
-        key="sub1"
-        icon={<FolderViewOutlined />}
-        title="View recent textures"
-        // style={{ textAlign: "left", display: "flex", alignItems: "center" }}
+        key="sub2"
+        icon={<FieldNumberOutlined />}
+        title="Frequent regions"
       >
-        <Menu.Item key="4">Option 1</Menu.Item>
-        <Menu.Item key="5">Option 2</Menu.Item>
-        <Menu.Item key="6">Option 3</Menu.Item>
+        {mostFreq.map((freq, index) => {
+          return (
+            <Menu.Item>
+              {`Region: ${freq._id || index}`}
+              <span> Count: {freq.count}</span>
+              {/* {`Count : ${freq.count}`} */}
+            </Menu.Item>
+          );
+        })}
       </SubMenu>
       {rectangleBounds && !texture ? (
         <>

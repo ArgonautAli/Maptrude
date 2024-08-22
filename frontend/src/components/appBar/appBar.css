@@ -1,0 +1,13 @@
+.menu-item-logo {
+  font-size: 1rem; /* Adjust size as needed */
+  display: flex;
+  align-items: center; /* Align items vertically center */
+  padding: 0px 16px; /* Adjust padding as needed */
+  border-radius: 8px; /* Rounded corners */
+  color: #1890ff; /* Primary color for text */
+  transition: background-color 0.3s ease; /* Smooth background color change */
+}
+
+.menu-item-logo:hover {
+  background-color: #e6f7ff; /* Lighter background on hover */
+}

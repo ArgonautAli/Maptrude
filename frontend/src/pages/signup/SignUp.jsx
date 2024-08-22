@@ -4,6 +4,9 @@ import { FormBox } from "../../components/formBox/FormBox";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { APP_ROUTES } from "../../utils";
+import { signUpUser } from "./helper";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const initialFormData = {
   username: "",
@@ -26,22 +29,54 @@ export const SignUp = () => {
     });
   };
 
-  const onSubmit = async () => {};
+  const onSubmit = async () => {
+    await signUpUser(
+      formData.fullname,
+      formData.username,
+      formData.password,
+      (data) => successHandler(data),
+      (data) => {
+        errorHandler(data);
+      }
+    );
+  };
+
+  const successHandler = (data) => {
+    toast.success(data.message, {
+      position: "top-center",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "light",
+    });
+    console.log(data);
+  };
+
+  const errorHandler = (data) => {
+    console.log("data", data);
+    toast.error(data, {
+      position: "top-center",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "light",
+    });
+    console.log(data);
+  };
 
   return (
     <div className="min-h-screen flex flex-col">
+      <ToastContainer />
       <Appbar />
-      <div
-        className="flex-grow flex items-center justify-center"
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          alignContent: "center",
-        }}
-      >
+      <div className="entry-page flex-grow flex items-center justify-center">
         <FormBox
-          label={"Signup"}
+          label={"Sign Up"}
           secondaryText={"Already a user? Login"}
           secondaryRoute={APP_ROUTES.LOGIN}
           formData={formData}

@@ -1,8 +1,7 @@
 import React from "react";
-import { Card, Space } from "antd";
-import { Button, Form, Input, Radio } from "antd";
-import { useState } from "react";
+import { Card, Space, Button, Form, Input } from "antd";
 import { useNavigate } from "react-router-dom";
+import "./formBox.css";
 
 export const FormBox = ({
   label,
@@ -28,35 +27,45 @@ export const FormBox = ({
       offset: 4,
     },
   };
+
+  const validatePassword = (_, value) => {
+    if (!value || form.getFieldValue("password") === value) {
+      return Promise.resolve();
+    }
+    return Promise.reject(new Error("Passwords do not match!"));
+  };
+
   return (
-    <div className="flex justify-center align-middle">
+    <div className="formBox-cont">
       <Space direction="vertical" size={16}>
         <Card
           title={
-            <div className="flex flex-col items-center">
-              <span className="text-2xl">😊</span>
-              <span>{label}</span>
+            <div className="card-title">
+              <span className="emoji">🐙</span>
+              <span className="text">{label}</span>
+              <span
+                className="sub"
+                onClick={() => {
+                  navigate(secondaryRoute);
+                }}
+              >
+                {secondaryText}
+              </span>
             </div>
           }
           style={{
             width: 500,
           }}
         >
-          <p
-            onClick={() => {
-              navigate(secondaryRoute);
-            }}
-          >
-            {secondaryText}
-          </p>
           <Form
             {...formItemLayout}
             className="mt-4"
             style={{ marginTop: "8px" }}
             form={form}
             onValuesChange={handleFormData} // Handle changes here
+            onFinish={onSubmit} // Handle form submission
           >
-            {label === "Signup" ? (
+            {label === "Sign Up" ? (
               <Form.Item label="Fullname" name="fullname">
                 <Input placeholder="input fullname" />
               </Form.Item>
@@ -67,13 +76,26 @@ export const FormBox = ({
             <Form.Item label="Password" name="password">
               <Input placeholder="input password" type="password" />
             </Form.Item>
-            {label === "Signup" ? (
-              <Form.Item label="Confirm Password" name="confirmPassword">
+            {label === "Sign Up" ? (
+              <Form.Item
+                label="Confirm Password"
+                name="confirmPassword"
+                dependencies={["password"]} // Ensure this field revalidates when password changes
+                rules={[
+                  {
+                    required: true,
+                    message: "Please confirm your password!",
+                  },
+                  {
+                    validator: validatePassword,
+                  },
+                ]}
+              >
                 <Input placeholder="re-enter password" type="password" />
               </Form.Item>
             ) : null}
             <Form.Item {...buttonItemLayout}>
-              <Button type="primary" onClick={onSubmit}>
+              <Button type="primary" htmlType="submit">
                 Submit
               </Button>
             </Form.Item>

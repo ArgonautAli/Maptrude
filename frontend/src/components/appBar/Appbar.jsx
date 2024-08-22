@@ -1,9 +1,12 @@
 import React from "react";
-import { HomeOutlined, UserOutlined, SettingOutlined } from "@ant-design/icons";
+import { Typography } from "antd";
 import { Menu, Button } from "antd";
 import { useNavigate } from "react-router-dom";
 import { APP_ROUTES } from "../../utils";
 import { getJwtToken, logout } from "../../pages/login/helper";
+import "./appBar.css";
+
+const { Text } = Typography;
 
 export const Appbar = () => {
   const navigate = useNavigate();
@@ -11,7 +14,9 @@ export const Appbar = () => {
 
   return (
     <Menu theme="light" mode="horizontal" defaultSelectedKeys={["1"]}>
-      <Menu.Item key="emoji">😊 Maptrude</Menu.Item>
+      <Menu.Item key="emoji" className="menu-item-logo">
+        🐙 Maptrude
+      </Menu.Item>
       <Menu.Item key="spacer" disabled style={{ marginLeft: "auto" }} />
       {isAuthenticated ? (
         <>
@@ -24,7 +29,7 @@ export const Appbar = () => {
                 localStorage.removeItem("persist:root");
               }}
             >
-              Logout
+              <Text type="danger">Logout</Text>
             </Button>
           </Menu.Item>
         </>

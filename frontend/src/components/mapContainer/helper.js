@@ -62,3 +62,27 @@ export const getTexture = async (
     errorCallback(error.message);
   }
 };
+
+export const getMostFreqText = async (
+  successCallback = () => {},
+  errorCallback = () => {}
+) => {
+  var config = {
+    method: "get",
+    url: API_ROUTES.getMostFreq,
+    headers: {
+      "Content-Type": "application/json",
+    },
+  };
+  try {
+    await axios(config)
+      .then(function (response) {
+        successCallback?.(response.data.data);
+      })
+      .catch(function (error) {
+        errorCallback?.(error.message);
+      });
+  } catch (error) {
+    errorCallback(error.message);
+  }
+};
