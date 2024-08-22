@@ -57,20 +57,20 @@ Several API optimisation processes are done to handle large datasets like:
 Redis caching is implement on both get textures & most frequent viewed sections API to minimise DB queries when data has not updated using ``` redis-client ```
 
 #### Strategies
-Reduced MongoDB Load: Caching reduces the number of read operations MongoDB must handle.
-Faster Response Times: Retrieving data from cache is significantly faster than running a full aggregation query.
-Cost Efficiency: Reduced database load can translate to lower infrastructure costs.
+- Reduced MongoDB Load: Caching reduces the number of read operations MongoDB must handle.
+- Faster Response Times: Retrieving data from cache is significantly faster than running a full aggregation query.
+- Cost Efficiency: Reduced database load can translate to lower infrastructure costs.
 
 2. ### Indexing:
 Data schema is created in such a way to optimise queries for geocodes so that most frequently captured regions are queried performantly 
 
 #### Strategies
-Faster Query Execution: MongoDB can quickly locate documents without scanning the entire collection.
-Reduced CPU Usage: Less time spent on searching translates to lower CPU usage.
+- Faster Query Execution: MongoDB can quickly locate documents without scanning the entire collection.
+- Reduced CPU Usage: Less time spent on searching translates to lower CPU usage.
 
 3. ### Memory use: 
 For frequent query, ``` allowDiskUse ``` is set to true so that memory use was optimized by carefully structuring the aggregation pipeline to minimize the amount of data kept in memory at any one time.
 
 #### Strategies
-Limit Operations: We used the $limit stage to reduce the amount of data processed by subsequent stages in the pipeline.
-Selective Fields: Only necessary fields were included in the operations to reduce the overall dataset size in memory.
+- Limit Operations: We used the $limit stage to reduce the amount of data processed by subsequent stages in the pipeline.
+- Selective Fields: Only necessary fields were included in the operations to reduce the overall dataset size in memory.
