@@ -39,7 +39,6 @@ export const Login = () => {
 
   const successHandler = (data) => {
     console.log(data);
-    toast("Login successful!");
     dispatch(
       setUserData({
         userName: data.userName,
