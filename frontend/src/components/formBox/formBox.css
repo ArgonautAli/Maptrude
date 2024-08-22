@@ -1,9 +1,16 @@
 .formBox-cont {
-  position: absolute; /* Absolute positioning to move it up */
-  transform: translateY(-10%);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
+  width: 90%;
+  max-width: 500px;
+  padding: 20px;
+  box-sizing: border-box;
 }
 
 .card-title {
@@ -12,17 +19,67 @@
   align-items: center;
   text-align: center;
   font-weight: 600;
+  margin-bottom: 16px;
 }
 
 .card-title .emoji {
-  font-size: 2.5rem; /* Adjust size as needed */
+  font-size: 2rem;
 }
 
 .card-title .text {
-  font-size: 1.5rem; /* Adjust size as needed */
+  font-size: 1.25rem;
   font-weight: bold;
+  margin: 8px 0;
 }
 
 .card-title .sub {
   font-weight: normal;
+  font-size: 1rem;
+  color: #007bff;
+}
+
+.ant-card {
+  width: 100%;
+}
+
+.ant-form-item {
+  margin-bottom: 16px;
+}
+
+.ant-btn {
+  width: 100%;
+  margin-top: 16px;
+}
+
+@media (max-width: 600px) {
+  .card-title .emoji {
+    font-size: 1.5rem;
+  }
+
+  .card-title .text {
+    font-size: 1.125rem;
+  }
+
+  .card-title .sub {
+    font-size: 0.875rem;
+  }
+
+  .formBox-cont {
+    width: 95%;
+    padding: 10px;
+  }
+}
+
+@media (max-width: 570px) {
+  .card-title .emoji {
+    font-size: 2rem;
+  }
+
+  .card-title .text {
+    font-size: 1.25rem;
+  }
+
+  .card-title .sub {
+    font-size: 1rem;
+  }
 }

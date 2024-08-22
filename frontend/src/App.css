@@ -20,11 +20,20 @@
   align-items: center;
   height: calc(100vh - 46px);
   position: relative;
-  background: linear-gradient(
-    135deg,
-    /* Angle of the gradient */ #fbc2eb,
-    /* Start color */ #a6c0fe /* End color */
-  );
+  background: linear-gradient(135deg, #fbc2eb, #a6c0fe);
+}
+
+@media (max-width: 600px) {
+  .entry-page {
+    height: calc(100vh - 60px);
+  }
+}
+
+@media (max-width: 570px) {
+  .entry-page {
+    height: calc(100vh - 60px);
+    padding: 8px;
+  }
 }
 
 @media (prefers-reduced-motion: no-preference) {

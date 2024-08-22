@@ -11,8 +11,6 @@ const { texture } = require("./routes/texture/texture.routes");
 const { dbConnect } = require("./db");
 const redisClient = require("./redisClient");
 
-const bodyParser = require("body-parser");
-
 async function redisCon() {
   await redisClient.connect();
 }
@@ -33,15 +31,16 @@ var app = express();
 
 app.use(
   cors({
-    origin: "*", // Allow all origins
+    origin: "*",
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
     allowedHeaders: "Content-Type,Authorization",
   })
 );
 
-app.use(express.json({ limit: "10mb" })); // Adjust the limit as needed
+app.options("*", cors());
 
-// Increase limit for URL-encoded payloads
+app.use(express.json({ limit: "10mb" }));
+
 app.use(express.urlencoded({ limit: "10mb", extended: true }));
 
 app.set("views", path.join(__dirname, "views"));

@@ -18,7 +18,6 @@ const createTexture = router.post("/", async function (req, res) {
 
     const cacheKey = `textures_${createdBy}`;
     const top_geocodes = "top_3_geocodes";
-    console.log("cacheKey", cacheKey);
     const result1 = await redisClient.del(cacheKey);
     const result2 = await redisClient.del(top_geocodes);
 
@@ -78,10 +77,17 @@ const getTexture = router.get("/:userId", async function (req, res) {
       return res.json({ status: "ok", data: JSON.parse(cachedData) });
     }
 
-    const textures = await Texture.find({ createdBy: userId });
+    const textures = await Texture.find({ createdBy: userId }).sort({
+      createdAt: -1,
+    });
+
     await redisClient.set(cachekey, JSON.stringify(textures));
+
     if (!textures.length) {
-      return res.json({ status: "error", message: "User does not exist" });
+      return res.json({
+        status: "error",
+        message: "Textures not found for user",
+      });
     }
 
     return res.json({ status: "ok", data: textures });

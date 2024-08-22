@@ -25,11 +25,16 @@ export const Toolbar = () => {
   const [current, setCurrent] = useState("1");
   const [textureList, setTextureList] = useState([]);
   const [mostFreq, setMostFreq] = useState([]);
+  const [callRecent, setCallRecent] = useState(false);
 
   useEffect(() => {
     getTextureHandler();
     getMostFrequentTexture();
   }, []);
+
+  useEffect(() => {
+    getTextureHandler();
+  }, [texture]);
 
   const getTextureHandler = async () => {
     await getTexture(
@@ -101,6 +106,9 @@ export const Toolbar = () => {
         key="sub1"
         icon={<FolderViewOutlined />}
         title="Recent textures"
+        onClick={() => {
+          setCallRecent(!callRecent);
+        }}
       >
         {textureList?.length > 0 ? (
           <>
