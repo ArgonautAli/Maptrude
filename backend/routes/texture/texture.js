@@ -103,6 +103,12 @@ const getMostCreated = router.get("/", async function (req, res) {
 
     const topGeoCodes = await Texture.aggregate([
       {
+        $project: {
+          geoCode: 1,
+          coords: 1,
+        },
+      },
+      {
         $group: {
           _id: {
             $cond: {
